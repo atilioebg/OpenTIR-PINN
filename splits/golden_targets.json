@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "version": "1.1.2",
+    "date": "deterministic build (no timestamp; provenance in data/dataset_facts.json)",
+    "purpose": "Immutable benchmark test suite - evaluated strictly once",
+    "num_golden_targets": 7,
+    "num_quarantined_siblings": 2
+  },
+  "golden_targets": [
+    {
+      "spectrum_id": "SPEC_0000_urban_concrete",
+      "sample_id": "0598UUUCNC",
+      "material_class": "urban_concrete",
+      "superclass": "urban",
+      "golden_target_name": "urban_concrete",
+      "name": "Construction  Concrete",
+      "source_filename": "manmade.concrete.constructionconcrete.solid.all.0598uuucnc.jhu.becknic.spectrum.txt",
+      "emissivity_hash": "2A850A5843577DEFD4A18DFFE75BBDC7"
+    },
+    {
+      "spectrum_id": "SPEC_0005_urban_asphalt",
+      "sample_id": "0095UUUASP",
+      "material_class": "urban_asphalt",
+      "superclass": "urban",
+      "golden_target_name": "urban_asphalt",
+      "name": "Construction Asphalt",
+      "source_filename": "manmade.road.pavingasphalt.solid.all.0095uuuasp.jhu.becknic.spectrum.txt",
+      "emissivity_hash": "47B6A9607CF461A7976BE6C75030966B"
+    },
+    {
+      "spectrum_id": "SPEC_0008_calcite",
+      "sample_id": "calcite_1",
+      "material_class": "calcite",
+      "superclass": "geological",
+      "golden_target_name": "calcite",
+      "name": "Calcite CaCO3",
+      "source_filename": "mineral.carbonate.none.coarse.tir.calcite_1.jhu.nicolet.spectrum.txt",
+      "emissivity_hash": "61930563CF06D06F5676F22DED478AD3"
+    },
+    {
+      "spectrum_id": "SPEC_0011_kaolinite",
+      "sample_id": "kaolinite_2",
+      "material_class": "kaolinite",
+      "superclass": "geological",
+      "golden_target_name": "kaolinite",
+      "name": "Kaolinite Al2Si2O5(OH)4",
+      "source_filename": "mineral.silicate.phyllosilicate.coarse.tir.kaolinite_2.jhu.nicolet.spectrum.txt",
+      "emissivity_hash": "FD2D48CAF1E54FA9C3EE8F0485DB877E"
+    },
+    {
+      "spectrum_id": "SPEC_0014_feldspar",
+      "sample_id": "anorthite_1",
+      "material_class": "feldspar",
+      "superclass": "geological",
+      "golden_target_name": "feldspar",
+      "name": "Anorthite CaAl2Si2O8",
+      "source_filename": "mineral.silicate.tectosilicate.coarse.tir.anorthite_1.jhu.nicolet.spectrum.txt",
+      "emissivity_hash": "56AD00E90BC97B5BC33FE045037B0B3B"
+    },
+    {
+      "spectrum_id": "SPEC_0015_quartz",
+      "sample_id": "quartz_1",
+      "material_class": "quartz",
+      "superclass": "geological",
+      "golden_target_name": "quartz",
+      "name": "Quartz SiO2",
+      "source_filename": "mineral.silicate.tectosilicate.coarse.tir.quartz_1.jhu.nicolet.spectrum.txt",
+      "emissivity_hash": "D34BEC280DDA0E5EEEDE29E9F9F29D1C"
+    },
+    {
+      "spectrum_id": "SPEC_0141_botanical",
+      "sample_id": "VH311",
+      "material_class": "botanical",
+      "superclass": "botanical",
+      "golden_target_name": "npv_bark",
+      "name": "Abies concolor bark",
+      "source_filename": "nonphotosyntheticvegetation.bark.abies.concolor.tir.vh311.ucsb.nicolet.spectrum.txt",
+      "emissivity_hash": "7325C1705F601B7BDFFFA924E1F62B59"
+    }
+  ],
+  "quarantined_siblings": [
+    {
+      "spectrum_id": "SPEC_0006_urban_asphalt",
+      "sample_id": "0096UUUASP",
+      "material_class": "urban_asphalt",
+      "superclass": "urban",
+      "name": "Construction Asphalt",
+      "source_filename": "manmade.road.pavingasphalt.solid.all.0096uuuasp.jhu.becknic.spectrum.txt",
+      "emissivity_hash": "8550EA61BE81470B1C63A62EB455751F"
+    },
+    {
+      "spectrum_id": "SPEC_0010_calcite",
+      "sample_id": "calcite_1",
+      "material_class": "calcite",
+      "superclass": "geological",
+      "name": "Calcite CaCO3",
+      "source_filename": "mineral.carbonate.none.solid.tir.calcite_1.jhu.nicolet.spectrum.txt",
+      "emissivity_hash": "B2DC92AE330D56A92A18D7EA3EDE4689"
+    }
+  ]
+}

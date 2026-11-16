@@ -6,7 +6,7 @@ description: Automatically captures, summarizes, and logs conceptual, physical, 
 # Clarification Logger Skill
 
 ## Overview
-This skill automates the capture, synthesis, and organization of scientific, mathematical, and algorithmic clarifications requested by the author (Dr. Atilio Grondona). It ensures that all deep conceptual explanations (such as "What is an ablation matrix?", "Why Sobolev loss?", "How does Planck's law constrain the network?") are permanently archived into [`clarification.md`](file:///c:/Users/Atilio/Desktop/PROJETOS/AITIR/clarification.md).
+This skill automates the capture, synthesis, and organization of scientific, mathematical, and algorithmic clarifications requested by the author (Dr. Atilio Grondona). It ensures that all deep conceptual explanations (such as "What is an ablation matrix?", "Why Sobolev loss?", "How does Planck's law constrain the network?") are permanently archived into [`docs/grounding/clarification.md`](file:///c:/Users/Atilio/Desktop/PROJETOS/AITIR/docs/grounding/clarification.md).
 
 ---
 
@@ -64,7 +64,7 @@ Structure the explanation into the following standardized schema:
 ```
 
 ### Step 3: Update `clarification.md`
-1. Read the current contents of [`clarification.md`](file:///c:/Users/Atilio/Desktop/PROJETOS/AITIR/clarification.md).
+1. Read the current contents of [`docs/grounding/clarification.md`](file:///c:/Users/Atilio/Desktop/PROJETOS/AITIR/docs/grounding/clarification.md).
 2. Determine the next sequential index `N` (e.g., `2`, `3`, `4`...).
 3. Add a new hyperlinked entry to the **Table of Contents** at the top of the document:
    ```markdown

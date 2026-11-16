@@ -1,0 +1,18 @@
+3. **ASTER & HyTES Full-Height 2D Hover Parity (Resolving Partial Tooltip Vanishing):**
+   * **Root Cause of Vanishing Tooltip:** In `go.Scatter` with `fill="toself"`, vertices existed only along the boundary line ($y=0.0$ and $y=1.02$). When the mouse hovered near the bottom edge ($y \approx 0.05$), Plotly detected proximity to the vertices and evaluated `hovertemplate`. However, as the cursor moved upward ($y \approx 0.4\text{--}0.7$), vertex proximity was lost; Plotly fell back to fill-mode hover, which discarded the template and rendered only the trace name (`ASTER Band #10`).
+   * **Robust Physical Solution:** Separated visual rendering from interaction. Band rectangles are rendered via background layout `shapes` (`layer="below"`), preventing trace conflicts. Tooltips are powered by an invisible 2D point grid (`opacity=0`, 7 horizontal $\times$ 7 vertical tiers spanning $y \in [0.05, 0.95]$) for both ASTER and HyTES. Moving the cursor anywhere vertically or horizontally triggers the identical full 6-line card without truncation:
+     ```
+     ASTER Band #10
+     Center Wavelength: 8.2910 μm
+     Bandwidth (FWHM): 354.0 nm
+     Band Start (λ_start): 8.1250 μm
+     Band End (λ_end): 8.4750 μm
+     Interval: [8.1250, 8.4750] μm
+     ```
+
+4. **Structured HTML Telemetry Table (Resolving Indented Markdown Code-Block Artifact):**
+   * **Root Cause of Degenerate Table HTML:** Python multiline f-strings indented inside a loop carried 16 leading spaces. In standard CommonMark/Markdown specification, any string indented with $\ge 4$ spaces is parsed as an indented preformatted code block (`<pre><code>`). Consequently, Streamlit rendered the raw HTML tags as text instead of parsing the DOM table.
+   * **Robust Solution:** Flattened the string assembly with zero leading whitespace, ensuring direct DOM ingestion.
+   * **Layout & Style:** Deep slate container (`#0f172a`), clean borders (`#334155`), dark header (`#1e293b`), colored partition badges, and row hover highlighting.
+   * **Columns:** `Spectrum ID` | `Specimen Name` | `Partition Role` | `Class` | `Particle Size` | `Val Fold` | `Train Folds` | `Min ε` | `Max ε` | `Mean ε` | `MD5 Checksum`.
+

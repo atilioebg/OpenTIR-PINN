@@ -1,253 +1,180 @@
-# TIR-PINN: Physics-Informed Neural Networks with Sobolev Shape Regularization for Ill-Posed Temperature and Emissivity Separation
+# OpenTIR-PINN: Physics-Informed Neural Networks with Sobolev Shape Regularization for Thermal Infrared Temperature and Emissivity Separation
 
-[![arXiv](https://img.shields.io/badge/arXiv-submit%2F8242913-B31B1B.svg)](https://arxiv.org/)
-[![Target: IEEE TGRS](https://img.shields.io/badge/Target-IEEE%20TGRS-00629B.svg)](https://mtt.org/publications/tgrs/)
+[![Target: Remote Sensing of Environment](https://img.shields.io/badge/Target-Remote%20Sensing%20of%20Environment-00629B.svg)](https://www.sciencedirect.com/journal/remote-sensing-of-environment)
+[![Zenodo DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.24085242-blue.svg)](https://doi.org/10.5281/zenodo.24085242)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-green.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.2%2B-red.svg)](https://pytorch.org/)
-[![ECOSTRESS Spectral Library](https://img.shields.io/badge/Data-ECOSTRESS%20%7C%20ASTER-blue.svg)](https://speclib.jpl.nasa.gov/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> **Official Implementation of the Research Manuscript:**  
-> **"Physics-Informed Neural Networks with Sobolev Shape Regularization for Ill-Posed Temperature and Emissivity Separation Across Multispectral and Hyperspectral Thermal Infrared Sensors"**  
-> **Authors:** Atilio Grondona¹*, Bijeesh Kozhikkodan Veettil², Luis Morales-Salinas³  
-> ¹ *State Center of Research on Remote Sensing and Meteorology (CEPSRM), Federal University of Rio Grande do Sul (UFRGS), Brazil*  
-> ² *Faculty of Applied Sciences, Van Lang University, Ho Chi Minh City, Vietnam*  
-> ³ *Laboratorio de Investigación en Ciencias Ambientales (LARES), Universidad de Chile, Santiago, Chile*  
+> **Official Code & Benchmark Repository for the Research Manuscript:**  
+> **"Physics-Informed Neural Networks with Sobolev Shape Regularization for Thermal Infrared Temperature and Emissivity Separation Across Multispectral and Hyperspectral Sensors"**  
+> **Authors:** Atilio Grondona¹⁴*, Fernanda Zunkowski Grondona¹, Bijeesh Kozhikkodan Veettil², Luis Morales-Salinas³  
+> ¹ *Research and Development Department, AgroRisco AI, Porto Alegre, RS 91760-630, Brazil*  
+> ² *Department of Environmental Technology and Management, Faculty of Applied Technology, Van Lang University, Ho Chi Minh City, Vietnam*  
+> ³ *Laboratory for Research in Environmental Sciences (LARES), Faculty of Agricultural Sciences, University of Chile, Santiago, Chile*  
+> ⁴ *Federal University of Rio Grande do Sul (UFRGS), Porto Alegre, Brazil*  
 > \* *Corresponding Author: atilio.grondona@ufrgs.br*
 
 ---
 
 ## 📌 Executive Summary
 
-Temperature and Emissivity Separation (TES) in Thermal Infrared (TIR) remote sensing is a canonical **ill-posed inverse problem**: an orbital sensor observing $N$ spectral channels measures $N$ radiances, but must resolve $N + 1$ unknowns (one surface kinetic temperature $T_s$ plus $N$ band-averaged spectral emissivities $\varepsilon_i$).
+Retrieving Land Surface Temperature (LST) and Land Surface Emissivity (LSE) from thermal infrared (TIR) radiances is a classically **ill-posed inverse problem**: an instrument observing in $N$ discrete spectral channels measures $N$ radiometric equations but faces $N + 1$ physical unknowns (one kinetic temperature $T_s$ and $N$ channel-integrated directional emissivities $\varepsilon_i$).
 
-Classical deterministic TES algorithms (e.g., Normalized Emissivity Method, Alpha-Derived Emissivity, Temperature-Independent Spectral Indices) resolve this underdetermination by relying on empirical min-max emissivity difference (MMD) power-law relationships. However, these heuristics suffer from severe instability under atmospheric compensation errors, low spectral contrast, and high-dimensional hyperspectral configurations.
+Operational heuristic algorithms, notably the **Temperature and Emissivity Separation (TES)** algorithm (Gillespie et al., 1998; Hulley et al., 2016), resolve this Planck degeneracy using an empirical power-law regression linking minimum spectral emissivity to spectral contrast (Min–Max Difference, MMD). While computationally expedient, this empirical heuristic:
+1. **Amplifies Channel Noise:** Stochastically inflates spectral contrast on flat natural emitters, triggering severe high-frequency sawtooth oscillations across hundreds of narrow hyperspectral channels (up to 18-fold noise amplification).
+2. **Compounds Atmospheric Errors:** Propagates precipitable water vapor (PWV) compensation errors directly into spurious surface temperature and emissivity biases.
+3. **Breaks Down on Anomalous Mineralogies:** Overfits to typical rock and soil spectra, failing on materials exhibiting deep Reststrahlen doublets (e.g., quartz and kaolinite).
 
-**TIR-PINN** introduces a deep physics-informed architecture that fundamentally redefines TES:
-1. **Differentiable Radiative Transfer Equation (RTE):** Enforces Planck's radiation law and MODTRAN-derived atmospheric profiles directly within the computational graph as soft physics constraints.
-2. **Sobolev $H^1$ Shape Regularization:** Couples standard $L^2$ spectral reconstruction loss with an $L^2$ gradient penalty ($\|
-abla_\lambda \varepsilon - \nabla_\lambda \hat{\varepsilon}\|_{L^2}^2$), eliminating unphysical high-frequency spectral oscillations while preserving narrow diagnostic absorption features (e.g., quartz reststrahlen doublets at $8.62\,\mu\text{m}$).
-3. **Dual-Scale Sensor Generalization:** Evaluated across both underconstrained multispectral platforms (**ASTER**, 5 thermal bands) and high-dimensional hyperspectral sensors (**HyTES**, 256 contiguous thermal channels).
-
----
-
-## 🔬 System Architecture & Training Workflow
-
-```mermaid
-flowchart TD
-    subgraph Data["1. Spectral Data Curation (ECOSTRESS)"]
-        Raw["Raw ECOSTRESS / ASTER JHU Spectral Library
-(>6,000 Laboratory Target Spectra)"]
-        Clean["Mineral & Soil Filtering
-Kirchhoff Law Conversion: ε(λ) = 1 - R(λ)"]
-        Library["Curated Pure Endmember Library
-(Quartz, Calcite, Kaolinite, Feldspar, Water)"]
-        Raw --> Clean --> Library
-    end
-
-    subgraph Physics["2. Differentiable Atmospheric Radiative Transfer (RTE)"]
-        MODTRAN["MODTRAN 5.4 Radiative Transfer LUTs
-Atmospheric Profiles: Mid-Latitude Summer/Winter"]
-        Ts["Kinetic Temperature Sampling: Ts ~ U(280 K, 330 K)"]
-        Planck["Planck Blackbody Function: B(λ, Ts)"]
-        RTE["High-Resolution Top-of-Atmosphere (TOA) Radiance:
-L_TOA(λ) = τ(λ)·ε(λ)·B(λ, Ts) + L_up(λ) + τ(λ)·[1 - ε(λ)]·L_down(λ)"]
-        
-        Library & Ts & MODTRAN --> Planck --> RTE
-    end
-
-    subgraph Sensor["3. Sensor Spectral Response Function (SRF) Degradation"]
-        SRF_HyTES["HyTES SRF Convolution (256 Bands, 7.5 - 12.0 μm)"]
-        SRF_ASTER["ASTER SRF Convolution (5 Bands, 8.125 - 11.65 μm)"]
-        Noise["Gaussian Sensor Noise Injection: NEDT ~ N(0, σ²)"]
-        
-        RTE --> SRF_HyTES --> Noise
-        RTE --> SRF_ASTER --> Noise
-    end
-
-    subgraph PINN["4. Physics-Informed Dual-Head Architecture"]
-        Input["Observed TOA Radiance: L_obs"]
-        Encoder["Shared Multi-Layer Perceptron / Residual Backbone"]
-        Head_T["Temperature Head: Regression -> T̂s"]
-        Head_E["Emissivity Head: Softplus/Sigmoid Constrained -> ε̂(λ)"]
-        
-        Noise --> Input --> Encoder
-        Encoder --> Head_T
-        Encoder --> Head_E
-    end
-
-    subgraph Loss["5. Sobolev H¹ Physics-Informed Optimization"]
-        Loss_Data["Data Reconstruction Loss: ||L_obs - L_pred||²"]
-        Loss_Sobolev["Sobolev H¹ Shape Loss:
-||ε - ε̂||² + α·||∇_λ ε - ∇_λ ε̂||²"]
-        Loss_Physics["Differentiable RTE Residual Loss"]
-        
-        Head_T & Head_E --> Loss_Data & Loss_Sobolev & Loss_Physics
-        Backprop["AdamW Optimizer + Cosine Annealing Learning Rate"]
-        Loss_Data & Loss_Sobolev & Loss_Physics --> Backprop --> Encoder
-    end
-```
+**OpenTIR-PINN** replaces empirical contrast regressions with a physics-informed deep learning framework that embeds fundamental radiative transfer and functional spectral smoothness directly into neural optimization:
+* **Bounded Thermodynamic Output Heads:** Employs shifted Softplus ($T_s > 200$\,K) and channel-wise Sigmoid ($\varepsilon \in (0, 1)$) activation heads, ensuring physical energy conservation by construction.
+* **Discrete Sobolev Regularization:** Penalizes first-order spectral slopes ($W^{1,1}$) and second-order curvatures ($W^{2,1}$) weighted by inter-channel wavelength spacing, suppressing high-frequency noise while preserving diagnostic mineral absorption doublets.
+* **Forward Planck Radiative Consistency:** Evaluates Kirchhoff's surface radiative transfer equation in brightness-temperature space during backpropagation, enforcing thermodynamic consistency as an explicit convergence criterion.
+* **Dual-Sensor Regime Parity:** Evaluated across both underdetermined multispectral sensors (**ASTER**, 5 TIR bands) and high-dimensional hyperspectral spectrometers (**HyTES**, 223 active TIR channels).
 
 ---
 
-## 📐 Mathematical Formulation
+## 📊 The OpenTIR-PINN Benchmark Suite (v1.3.0)
 
-### 1. Thermal Radiative Transfer Equation (RTE)
-For a non-isothermal plane-parallel atmosphere under local thermodynamic equilibrium, the spectral radiance observed at sensor altitude $L_{\text{obs}}(\lambda)$ is formulated as:
+The accompanying benchmark dataset is archived and citable on Zenodo under [DOI: 10.5281/zenodo.24085242](https://doi.org/10.5281/zenodo.24085242).
 
-$$L_{\text{obs}}(\lambda) = \tau(\lambda) \varepsilon(\lambda) B(\lambda, T_s) + L^{\uparrow}(\lambda) + \tau(\lambda) [1 - \varepsilon(\lambda)] L^{\downarrow}(\lambda)$$
-
-where:
-* $B(\lambda, T_s) = \frac{c_1}{\lambda^5 \left[ \exp\left(\frac{c_2}{\lambda T_s}\right) - 1 \right]}$ is Planck's blackbody law ($c_1 = 1.19104 \times 10^8\,\text{W}\cdot\mu\text{m}^4/(\text{m}^2\cdot\text{sr})$, $c_2 = 1.43877 \times 10^4\,\mu\text{m}\cdot\text{K}$).
-* $\tau(\lambda)$: Total atmospheric path transmittance from surface to sensor.
-* $L^{\uparrow}(\lambda)$: Atmospheric upwelling thermal path radiance.
-* $L^{\downarrow}(\lambda)$: Atmospheric downwelling sky irradiance reflected by the surface.
-* $\varepsilon(\lambda)$: Directional land surface emissivity.
-* $T_s$: Kinetic surface temperature (K).
-
-### 2. Sobolev $H^1$ Shape Regularization
-Standard neural network loss functions ($L^2$ or MSE) treat spectral channels as independent, uncorrelated dimensions, leading to unphysical high-frequency "sawtooth" artifacts in the retrieved emissivity spectrum. 
-
-TIR-PINN regularizes the solution space inside the **Sobolev space $W^{1,2}(\Omega) = H^1(\Omega)$**, penalizing both amplitude errors and directional spectral gradient deviations:
-
-$$\mathcal{L}_{H^1} = \|\varepsilon - \hat{\varepsilon}\|_{L^2}^2 + \alpha_s \|\nabla_\lambda \varepsilon - \nabla_\lambda \hat{\varepsilon}\|_{L^2}^2 = \frac{1}{N} \sum_{i=1}^{N} (\varepsilon_i - \hat{\varepsilon}_i)^2 + \frac{\alpha_s}{N-1} \sum_{i=1}^{N-1} \left[ (\varepsilon_{i+1} - \varepsilon_i) - (\hat{\varepsilon}_{i+1} - \hat{\varepsilon}_i) \right]^2$$
-
-where $\alpha_s = 0.35$ enforces physical smoothness while strictly preserving true mineral reststrahlen band curvatures.
-
-### 3. Total Multi-Task Loss Objective
-$$\mathcal{L}_{\text{total}} = \lambda_{\text{MSE}} \mathcal{L}_{\text{MSE}}(L_{\text{obs}}, \hat{L}_{\text{obs}}) + \lambda_T |T_s - \hat{T}_s| + \lambda_{\text{Sobolev}} \mathcal{L}_{H^1}(\varepsilon, \hat{\varepsilon}) + \lambda_{\text{phys}} \mathcal{L}_{\text{RTE}}$$
+| Benchmark Dimension | Specification | Grounding Reference |
+|---|---|---|
+| **Curated Spectral Library** | 240 high-resolution laboratory/field spectra across 11 material classes | ECOSTRESS / USGS Spectral Libraries |
+| **Similarity Grouping** | 162 disjoint spectral similarity groups (preventing split leakage) | `splits/split_v1.1.json` |
+| **Quarantined Golden Targets** | 7 pristine endmembers (Quartz, Kaolinite, Calcite, Feldspar, Concrete, Asphalt, Conifer Bark) | Sequestered outside all training folds |
+| **Atmospheric Radiative Transfer** | 30 MODTRAN 5.2 DISORT 8-stream profiles (PWV: $0.35$ to $5.40\,\mathrm{g\,cm^{-2}}$) | Tropical, Mid-Lat, Sub-Arctic, US Standard |
+| **Quadrature Formulation** | 8-node Gauss–Legendre hemispheric downwelling integration ($L^{\downarrow}$) | Converged to within 0.08% of 16-node reference |
+| **Sensors Evaluated** | ASTER (5 bands, $8.125\text{--}11.65\,\mu\mathrm{m}$) and HyTES (223 channels, $7.50\text{--}12.00\,\mu\mathrm{m}$) | Full SRF convolution and opaque-band masking |
+| **Evaluation Matrix** | $2 \times 2$ Double-Quarantine Matrix (Q-I In-Domain, Q-II Material OOD, Q-III Atmospheric OOD, Q-IV Joint Novelty) | 36,652 unique physical evaluation samples |
+| **Verification Gate** | 32-test automated audit suite (416 individual checks: 402 PASS, 1 WARN, 0 FAIL, 13 INFO) | `scripts/validate_dataset_integrity.py` |
 
 ---
 
-## 📊 Scientific Validation & Quantitative Benchmarks
+## 🚀 Key Experimental Findings
 
-The framework was benchmarked against the standard NASA/JPL Temperature and Emissivity Separation (TES) algorithm across 1,200 independent out-of-distribution test spectra from the ECOSTRESS library under varying atmospheric profiles (MODTRAN Mid-Latitude Summer, column water vapor $\omega \in [0.5, 3.5]\,\text{g/cm}^2$):
-
-### Temperature & Emissivity Separation Performance
-
-| Sensor Platform | Spectral Bands | Retrieval Algorithm | Temperature MAE (K) | Temperature RMSE (K) | Emissivity RMSE | Spectral Angle Mapper (SAM, rad) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **ASTER (Multispectral)** | 5 bands | Classical TES (Gillespie et al.) | 1.39 K | 1.84 K | 0.0241 | 0.064 rad |
-| **ASTER (Multispectral)** | 5 bands | Standard MLP (No Physics) | 0.82 K | 1.15 K | 0.0165 | 0.041 rad |
-| **ASTER (Multispectral)** | **5 bands** | **TIR-PINN (Ours)** | **0.38 K** | **0.52 K** | **0.0084** | **0.019 rad** |
-| **HyTES (Hyperspectral)** | 256 bands | Classical Hyperspectral TES | 1.12 K | 1.48 K | 0.0189 | 0.048 rad |
-| **HyTES (Hyperspectral)** | 256 bands | Standard PINN ($L^2$ Only) | 0.49 K | 0.68 K | 0.0092 | 0.024 rad |
-| **HyTES (Hyperspectral)** | **256 bands** | **TIR-PINN with Sobolev $H^1$** | **0.27 K** | **0.36 K** | **0.0041** | **0.012 rad** |
-
-### Key Physical Breakthroughs:
-* **80.5% Temperature Error Reduction:** On hyperspectral data, kinetic temperature error dropped from $1.39\text{ K}$ (classical TES) to **$0.27\text{ K}$**, well within the radiometric noise limit of the instrument.
-* **Ablation of Sobolev Shape Regularization:** Adding the Sobolev $H^1$ gradient penalty decreased spectral angle error (SAM) by **50%** ($0.024 \to 0.012\text{ rad}$), preventing spectral inversion collapse across carbonate and silicate absorption doublets.
+1. **Hyperspectral Decisive Advantage (HyTES):** Relying solely on surface-leaving radiance ($\hat{\mathbf{L}}_{\mathrm{surf}}$) without auxiliary atmospheric telemetry, the PINN reduces LST root-mean-square error by **44.0%** (1.186 vs. 2.119 K), cuts channel-averaged emissivity error by **68.4%**, halves water-vapor error propagation, and eliminates the 18-fold high-frequency noise amplification of classical TES.
+2. **Multispectral Operational Parity (ASTER):** Five broad bands lack the mathematical degrees of freedom to decouple surface emission from atmospheric attenuation without auxiliary telemetry ($\hat{\bm{\tau}}$, $\hat{\mathbf{L}}^{\downarrow}$). Under strict input parity, the PINN achieves operational parity in temperature (1.528 vs. 1.781 K) while reconstructing emissivity shapes with superior angular fidelity (SAM error reduced by 56.8%).
+3. **Failure Boundary Transparency:** On anomalous mineralogies exhibiting extreme absorption depths beyond the training manifold (exemplified by kaolinite), the neural shrinkage prior induces cold temperature biases ($-4$ to $-12$\,K). Model ensemble spread captures these out-of-domain targets on HyTES ($77\%\text{--}100\%$ coverage within $2\sigma$), but fails on ASTER, establishing the operational necessity of radiance-derived novelty filters.
+4. **Computational Ground-Segment Scalability:** Batched inference processes $>51,000$ pixels/s on ASTER and $>23,000$ pixels/s on HyTES on a single laptop CPU core (scaling to $>153,000$ and $>81,000$ pixels/s with 10 threads), establishing that physics-informed neural retrieval is computationally ready for satellite ground segments without requiring GPU hardware.
 
 ---
 
-## 🖼️ High-Resolution Validation Figures
+## 🖥️ Interactive Dataset Explorer Dashboard
 
-| Figure 1: Emissivity Recovery Across Mineral Classes | Figure 2: Temperature Inversion Error Distributions |
-| :---: | :---: |
-| ![Emissivity Comparison](fig1_emissivity_comparison.png) | ![Temperature Accuracy](fig2_temperature_accuracy.png) |
-| *Preservation of Quartz 8.62 μm doublet and Kaolinite spectral slopes under 256-band HyTES and 5-band ASTER sensors.* | *Residual temperature error distribution (K) comparing Classical TES vs. Sobolev-regularized TIR-PINN.* |
+The repository includes a standalone interactive Streamlit web dashboard for visual dataset inspection, radiative transfer auditing, and evaluation matrix exploration:
 
----
-
-## 📁 Repository Structure
-
-```
-TIR_PINN/
-├── src/
-│   ├── data_generation/          # MODTRAN & ECOSTRESS Ingestion
-│   │   ├── curate_spectral_library.py  # Kirchhoff conversion & quality filtering
-│   │   ├── automate_modtran.py         # MODTRAN 5.4 atmospheric LUT automation
-│   │   └── sensor_convolution.py       # ASTER & HyTES SRF integration
-│   │
-│   ├── models/                   # Neural Architectures
-│   │   ├── tir_pinn.py           # Multi-Head PINN with Differentiable RTE
-│   │   ├── sobolev_loss.py       # Custom Sobolev H¹ Loss Function
-│   │   └── classical_tes.py      # Gillespie Classical TES Baseline Benchmark
-│   │
-│   ├── training/                 # Model Training & Hyperparameter Tuning
-│   │   ├── train_generalist.py   # Large-scale base model training
-│   │   └── train_specialist.py   # Low-learning-rate fine-tuning on high-fidelity spectra
-│   │
-│   └── evaluation/               # Publication Metrics & Plots
-│       ├── evaluate_test_set.py  # Table I & Table II metric calculation (MAE, RMSE, SAM)
-│       └── generate_figures.py   # Publication-grade figure generation (300+ DPI)
-│
-├── manuscript/                   # Active Research Manuscript
-│   ├── main.tex                  # Complete IEEE TGRS LaTeX source
-│   ├── references.bib            # Curated BibTeX references
-│   └── figures/                  # Vectorized PDF and high-res PNG manuscript figures
-│
-├── data/                         # Spectral and atmospheric profiles
-│   ├── ecostress_curated/        # Preprocessed spectral endmembers (.npy / .parquet)
-│   └── modtran_lut/              # Atmospheric transmittance & path radiance LUTs
-│
-├── outputs/                      # Model checkpoints and evaluation logs
-├── fig1_emissivity_comparison.png# High-res publication Figure 1
-├── fig2_temperature_accuracy.png # High-res publication Figure 2
-├── requirements.txt              # Environment dependencies
-└── README.md                     # Main Scientific & Technical Documentation
-```
-
----
-
-## 🚀 Quickstart & Reproduction
-
-### 1. Installation
 ```bash
-# Clone the repository
-git clone https://github.com/atilioebg/TIR_PINN.git
-cd TIR_PINN
+# Launch the interactive web dashboard
+streamlit run scripts/dataset_explorer_dashboard.py
+```
 
-# Create virtual environment and install requirements
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scriptsctivate
+### Dashboard Capabilities:
+* **Planck Inversion & Forward Radiative Transfer:** Interactively simulate surface-leaving radiance across temperatures (275–335 K) and atmospheric columns.
+* **Sensor Geometry & Spectral Response:** Inspect channel center wavelengths, SRF convolution curves, and opaque water-vapor band masks for ASTER and HyTES.
+* **4-Quadrant Stress Matrix Navigator:** Interactively filter and compare Q-I (in-distribution), Q-II (quarantined golden targets), Q-III (winter atmospheres), and Q-IV (joint stress) sample distributions.
+* **Spectral Similarity Clustering:** Audit the 162 group-disjoint clusters and verify zero data leakage across 5-fold splits.
+* **Automated Audit Suite Telemetry:** Review the 32 automated verification test results, acceptance criteria, and contingency tables.
+
+---
+
+## 📦 Quickstart & Installation
+
+### 1. Environment Setup
+
+Clone the repository and install the production dependencies:
+
+```bash
+git clone https://github.com/atilioebg/OpenTIR-PINN.git
+cd OpenTIR-PINN
+
+# Install required packages
 pip install -r requirements.txt
 ```
 
-### 2. Preprocess Spectral Library & Convolve Sensors
-```bash
-# Extract and filter ECOSTRESS spectra
-python src/data_generation/curate_spectral_library.py --input-dir data/ecostress_raw --output-dir data/ecostress_curated
+### 2. Verify Dataset Integrity (32-Test Audit)
 
-# Convolve with ASTER and HyTES SRFs
-python src/data_generation/sensor_convolution.py --sensor all
+Execute the automated verification suite to validate all 416 physical, numerical, and split-integrity checks:
+
+```bash
+python scripts/validate_dataset_integrity.py
 ```
 
-### 3. Train TIR-PINN with Sobolev Regularization
+### 3. Run Pipeline or Training Benchmarks
+
+To execute training, cross-validation, or evaluation:
+
 ```bash
-# Train on HyTES (Hyperspectral)
-python src/training/train_generalist.py --sensor hytes --sobolev-weight 0.35 --epochs 150
+# Execute the cross-validation training workflow
+python src/training/orchestrate_training_pipeline.py
 
-# Train on ASTER (Multispectral)
-python src/training/train_generalist.py --sensor aster --sobolev-weight 0.20 --epochs 150
-```
-
-### 4. Evaluate Test Metrics & Generate Figures
-```bash
-# Compute Table I & II validation statistics
-python src/evaluation/evaluate_test_set.py --checkpoint outputs/hytes_best.pt
-
-# Generate publication-grade figures
-python src/evaluation/generate_figures.py
+# Run leave-one-class-out (LOCO) generalization benchmarks
+python src/training/train_loco_suite.py
 ```
 
 ---
 
-## 📖 Citation
+## 📂 Repository Architecture
 
-If you use this codebase or methodology in your research, please cite our preprint:
+```text
+AITIR/
+├── data/                    # Open Source Benchmark specifications & Single Source of Truth
+│   ├── dataset_facts.json   # Machine-readable SSOT manifest (v1.3.0)
+│   └── DATA_DICTIONARY.md   # Formal dataset feature schema & sensor specifications
+├── docs/                    # User documentation & pipeline guides
+│   ├── DASHBOARD_USER_GUIDE.md # Comprehensive guide for the Streamlit dashboard
+│   ├── PIPELINE_README.md      # Data synthesis & forward radiative transfer documentation
+│   └── dataset_validation_protocol.md # Specification of the 32 audit test families
+├── scripts/                 # Reproducibility, evaluation, and dashboard runners
+│   ├── dataset_explorer_dashboard.py # Interactive Streamlit exploration application
+│   ├── validate_dataset_integrity.py # 32-test automated audit suite
+│   ├── build_dataset_facts.py        # SSOT manifest generator
+│   └── run_pipeline.py               # End-to-end data pipeline orchestrator
+├── splits/                  # Group-disjoint 5-fold cross-validation & LOCO split manifests
+├── src/                     # Core deep learning & physical modeling library
+│   ├── baselines/           # Classical TES implementation (ASTER & HyTES ATBD)
+│   ├── data_generation/     # Forward radiative transfer synthesizers & splitters
+│   ├── evaluation/          # Paired bootstrap inference & statistical testing
+│   ├── models/              # Decoupled PINN architectures & Sobolev/Planck losses
+│   └── training/            # Cross-validation, Optuna Bayesian HPO, & LOCO suites
+├── tests/                   # Automated unit & integration tests
+├── requirements.txt         # Minimal production Python dependencies
+└── README.md                # Project documentation & benchmark overview
+```
 
+---
+
+## 📜 Citation & Attribution
+
+If you use the OpenTIR-PINN benchmark dataset, neural architectures, or evaluation code in your research, please cite:
+
+### Dataset Citation (Zenodo)
 ```bibtex
-@article{grondona2026tirpinn,
-  title={Physics-Informed Neural Networks with Sobolev Shape Regularization for Ill-Posed Temperature and Emissivity Separation Across Multispectral and Hyperspectral Thermal Infrared Sensors},
-  author={Grondona, At{'i}lio and Veettil, Bijeesh Kozhikkodan and Morales-Salinas, Luis},
-  journal={arXiv preprint arXiv:submit/8242913 [physics.geo-ph]},
-  year={2026},
-  note={Under review at IEEE Transactions on Geoscience and Remote Sensing (TGRS)}
+@dataset{grondona2026opentir,
+  author       = {Grondona, Atilio},
+  title        = {{OpenTIR-PINN: Physics-Informed Neural Network Benchmark for Thermal Infrared Temperature-Emissivity Separation (v1.3.0)}},
+  month        = nov,
+  year         = 2026,
+  publisher    = {Zenodo},
+  version      = {v1.3.0},
+  doi          = {10.5281/zenodo.24085242},
+  url          = {https://doi.org/10.5281/zenodo.24085242}
+}
+```
+
+### Manuscript Citation (Target: Remote Sensing of Environment)
+```bibtex
+@article{grondona2026physics,
+  title   = {Physics-informed neural networks with {Sobolev} shape regularization for thermal infrared temperature and emissivity separation across multispectral and hyperspectral sensors},
+  author  = {Grondona, Atilio and Grondona, Fernanda Zunkowski and Veettil, Bijeesh Kozhikkodan and Morales-Salinas, Luis},
+  journal = {Remote Sensing of Environment},
+  year    = {2026},
+  note    = {Under Review}
 }
 ```
 
 ---
 
-## ⚖️ License
-This project is open-source under the [MIT License](LICENSE).
+## 📄 License
+
+This project is licensed under the **MIT License**; see the [LICENSE](LICENSE) file for details.

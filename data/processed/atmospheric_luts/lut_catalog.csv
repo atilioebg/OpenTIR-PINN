@@ -1,7 +1,31 @@
-run_id,atm_model,water_vapor,view_angle,output_file
-run_0000_atm2_h2o0.5_ang180.0,2,0.5,180.0,C:\Users\Atilio\Desktop\PROJETOS\AITIR\data\processed\atmospheric_luts\run_0000_atm2_h2o0.5_ang180.0_tape7.txt
-run_0001_atm2_h2o1.0_ang180.0,2,1.0,180.0,C:\Users\Atilio\Desktop\PROJETOS\AITIR\data\processed\atmospheric_luts\run_0001_atm2_h2o1.0_ang180.0_tape7.txt
-run_0002_atm2_h2o2.0_ang180.0,2,2.0,180.0,C:\Users\Atilio\Desktop\PROJETOS\AITIR\data\processed\atmospheric_luts\run_0002_atm2_h2o2.0_ang180.0_tape7.txt
-run_0003_atm3_h2o0.5_ang180.0,3,0.5,180.0,C:\Users\Atilio\Desktop\PROJETOS\AITIR\data\processed\atmospheric_luts\run_0003_atm3_h2o0.5_ang180.0_tape7.txt
-run_0004_atm3_h2o1.0_ang180.0,3,1.0,180.0,C:\Users\Atilio\Desktop\PROJETOS\AITIR\data\processed\atmospheric_luts\run_0004_atm3_h2o1.0_ang180.0_tape7.txt
-run_0005_atm3_h2o2.0_ang180.0,3,2.0,180.0,C:\Users\Atilio\Desktop\PROJETOS\AITIR\data\processed\atmospheric_luts\run_0005_atm3_h2o2.0_ang180.0_tape7.txt
+profile_id,atm_model_idx,atm_model_name,h2o_scale,pwv_g_cm2,pwv_requested_g_cm2,h2o_capped_at_saturation,quarantine_status,num_spectral_channels,min_wavelength_um,max_wavelength_um,md5_hash,csv_file,npz_file
+atm1_h2o0.50,1,Tropical,0.5,2.0574,2.0574,False,development,776,6.969,15.152,218A2EB5BDE2333CF2D4C89910FEB94F,profile_atm1_h2o0.50.csv,profile_atm1_h2o0.50.npz
+atm1_h2o0.75,1,Tropical,0.75,3.086,3.086,False,development,776,6.969,15.152,B9F90BB981B9FED2DC8126CAE90C8278,profile_atm1_h2o0.75.csv,profile_atm1_h2o0.75.npz
+atm1_h2o1.00,1,Tropical,1.0,4.1147,4.1147,False,development,776,6.969,15.152,2CFAEAFE2915090D13668A0E672C6C74,profile_atm1_h2o1.00.csv,profile_atm1_h2o1.00.npz
+atm1_h2o1.50,1,Tropical,1.5,6.1721,6.1721,False,development,776,6.969,15.152,9DB0A3F5A56FF2ABE4F103DB6F5861F9,profile_atm1_h2o1.50.csv,profile_atm1_h2o1.50.npz
+atm1_h2o2.00,1,Tropical,2.0,6.7669,8.2295,True,development,776,6.969,15.152,9DEAA7C6C4F259D413CEDCC844DAFC97,profile_atm1_h2o2.00.csv,profile_atm1_h2o2.00.npz
+atm2_h2o0.50,2,Mid-Latitude Summer,0.5,1.4612,1.4612,False,development,776,6.969,15.152,6032D34FC9787B1586834A5A297EC922,profile_atm2_h2o0.50.csv,profile_atm2_h2o0.50.npz
+atm2_h2o0.75,2,Mid-Latitude Summer,0.75,2.1918,2.1918,False,development,776,6.969,15.152,C3BB4F3A7A457F257FE75431F2DC08C1,profile_atm2_h2o0.75.csv,profile_atm2_h2o0.75.npz
+atm2_h2o1.00,2,Mid-Latitude Summer,1.0,2.9224,2.9224,False,development,776,6.969,15.152,BA27014C6D47867F8EE9D09CDC0A8DBF,profile_atm2_h2o1.00.csv,profile_atm2_h2o1.00.npz
+atm2_h2o1.50,2,Mid-Latitude Summer,1.5,4.3835,4.3835,False,development,776,6.969,15.152,FE73F75176717C01813A992FD9F5E353,profile_atm2_h2o1.50.csv,profile_atm2_h2o1.50.npz
+atm2_h2o2.00,2,Mid-Latitude Summer,2.0,5.3458,5.8447,True,development,776,6.969,15.152,35993E4FDB8C24B6BA11445EED9EF923,profile_atm2_h2o2.00.csv,profile_atm2_h2o2.00.npz
+atm3_h2o0.50,3,Mid-Latitude Winter,0.5,0.4259,0.4259,False,golden_quarantined,776,6.969,15.152,D905141CAD3C5B73863E6A4C196EBC79,profile_atm3_h2o0.50.csv,profile_atm3_h2o0.50.npz
+atm3_h2o0.75,3,Mid-Latitude Winter,0.75,0.6388,0.6388,False,golden_quarantined,776,6.969,15.152,F0C7825B5CE7CA6AE7E5D1C46D8154AC,profile_atm3_h2o0.75.csv,profile_atm3_h2o0.75.npz
+atm3_h2o1.00,3,Mid-Latitude Winter,1.0,0.8517,0.8517,False,golden_quarantined,776,6.969,15.152,746D12CB82CB6F849E32CD112EAC40B9,profile_atm3_h2o1.00.csv,profile_atm3_h2o1.00.npz
+atm3_h2o1.50,3,Mid-Latitude Winter,1.5,1.2776,1.2776,False,golden_quarantined,776,6.969,15.152,982AC4580DD54A9573EB014B79236772,profile_atm3_h2o1.50.csv,profile_atm3_h2o1.50.npz
+atm3_h2o2.00,3,Mid-Latitude Winter,2.0,1.3724,1.7034,True,golden_quarantined,776,6.969,15.152,7EC6BA7CF92E56047D77F5E8097D06EB,profile_atm3_h2o2.00.csv,profile_atm3_h2o2.00.npz
+atm4_h2o0.50,4,Sub-Arctic Summer,0.5,1.0406,1.0406,False,development,776,6.969,15.152,870BF3815D6ADC8266ABA9B9BAE7FB4A,profile_atm4_h2o0.50.csv,profile_atm4_h2o0.50.npz
+atm4_h2o0.75,4,Sub-Arctic Summer,0.75,1.5609,1.5609,False,development,776,6.969,15.152,2FD169029B05595BA704A8D192A3D5CE,profile_atm4_h2o0.75.csv,profile_atm4_h2o0.75.npz
+atm4_h2o1.00,4,Sub-Arctic Summer,1.0,2.0813,2.0813,False,development,776,6.969,15.152,81E69DF30E5C64984E1AF6EE605AA118,profile_atm4_h2o1.00.csv,profile_atm4_h2o1.00.npz
+atm4_h2o1.50,4,Sub-Arctic Summer,1.5,3.1219,3.1219,False,development,776,6.969,15.152,82BFD6DD2B91DAF37B7A0FD79920C9F5,profile_atm4_h2o1.50.csv,profile_atm4_h2o1.50.npz
+atm4_h2o2.00,4,Sub-Arctic Summer,2.0,3.1267,4.1625,True,development,776,6.969,15.152,63E40BFF94EAEA1735D98F7BA2307486,profile_atm4_h2o2.00.csv,profile_atm4_h2o2.00.npz
+atm5_h2o0.50,5,Sub-Arctic Winter,0.5,0.2081,0.2081,False,golden_quarantined,776,6.969,15.152,B2EC2717E249BA2578FB7BDB3847CF22,profile_atm5_h2o0.50.csv,profile_atm5_h2o0.50.npz
+atm5_h2o0.75,5,Sub-Arctic Winter,0.75,0.3121,0.3121,False,golden_quarantined,776,6.969,15.152,7FBA10880FEAE70FBACC07C615E1C652,profile_atm5_h2o0.75.csv,profile_atm5_h2o0.75.npz
+atm5_h2o1.00,5,Sub-Arctic Winter,1.0,0.4161,0.4161,False,golden_quarantined,776,6.969,15.152,A581EEF11AC8EB5529417D1C7AB29446,profile_atm5_h2o1.00.csv,profile_atm5_h2o1.00.npz
+atm5_h2o1.50,5,Sub-Arctic Winter,1.5,0.6242,0.6242,False,golden_quarantined,776,6.969,15.152,CA28696470877831D4F961AA2C7A79C9,profile_atm5_h2o1.50.csv,profile_atm5_h2o1.50.npz
+atm5_h2o2.00,5,Sub-Arctic Winter,2.0,0.6268,0.8323,True,golden_quarantined,776,6.969,15.152,44272D1DA28FBB9A8D4BA0E19C9A7F37,profile_atm5_h2o2.00.csv,profile_atm5_h2o2.00.npz
+atm6_h2o0.50,6,1976 US Standard,0.5,0.7082,0.7082,False,development,776,6.969,15.152,60BD317BDCDBFDE5F79D0C219A783BDD,profile_atm6_h2o0.50.csv,profile_atm6_h2o0.50.npz
+atm6_h2o0.75,6,1976 US Standard,0.75,1.0623,1.0623,False,development,776,6.969,15.152,6C6719372D4CC49E4AD722C6886AEEEA,profile_atm6_h2o0.75.csv,profile_atm6_h2o0.75.npz
+atm6_h2o1.00,6,1976 US Standard,1.0,1.4164,1.4164,False,development,776,6.969,15.152,416BDC040CF583BC99474CB8E98A770F,profile_atm6_h2o1.00.csv,profile_atm6_h2o1.00.npz
+atm6_h2o1.50,6,1976 US Standard,1.5,2.1247,2.1247,False,development,776,6.969,15.152,57F4F0B522D6C0E420B63C660BFF04BE,profile_atm6_h2o1.50.csv,profile_atm6_h2o1.50.npz
+atm6_h2o2.00,6,1976 US Standard,2.0,2.8329,2.8329,False,development,776,6.969,15.152,AA68FA85D581A049D4185E0E0146FF4F,profile_atm6_h2o2.00.csv,profile_atm6_h2o2.00.npz

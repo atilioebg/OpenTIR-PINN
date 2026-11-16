@@ -1,16 +1,83 @@
-venv/
+# =========================================================================
+# OpenTIR-PINN Official Repository .gitignore
+# Rules: Only essential production, evaluation, and documentation assets
+# are pushed to remote. Heavy data, intermediate notes, and manuscript
+# drafts remain local.
+# =========================================================================
+
+# Python & Environment
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
 .env
+.venv
+*.log
+*.sqlite
+*.db
+
+# OS & IDE
 .DS_Store
-.vscode/
+Thumbs.db
 .idea/
+.vscode/
+*.swp
+*.swo
 
-# Data
-data/processed/*
-!data/processed/**/.gitkeep
+# Local Manuscript Drafts & Revisions (Local Only)
+manuscript/
+*.docx
+*.pdf
+*.pptx
 
-# Internal Notes, Planning, & Bundles
-clarification.md
-implementation_plan_scientific_paper.md
-manuscript_arxiv.zip
+# Zenodo Release Package & Large Archives (Local Only - Hosted on Zenodo)
+zenodo_release/
+*.zip
+*.tar.gz
+*.7z
+
+# Intermediate Paper Logs & Experimental Workbenches (Local Only)
+paper_log/
+outputs/
+outputs_dual/
+logs/
+
+# Restricted / Proprietary Radiative Transfer Configurations (Local Only)
+modtran/
+
+# Literature, PDFs & Reference Libraries (Local Only - Copyrighted)
+bibliografic_references/
+
+# Heavy / Intermediate Data Artifacts (Local Only - Raw & Binary Tensors)
+data/raw/
+data/processed/
+data/archive/
+data/validation/
+data/smoke/
+data/DATASET_AUDIT_LOG.md
+data/validation_run.log
+
+# Internal Grounding, Audit Memos & Scratch Docs (Local Only)
+docs/grounding/
+docs/analysis/
+docs/analysis_D/
+docs/analysis_BC_engine_log.txt
+docs/bibliometric_telemetry_matrix.md
+docs/citation_audit_report_v2.md
+docs/cot_item_by_item_validation_v1_v2.md
+docs/editor_notes.md
+docs/implementation_plan_scientific_paper.md
+docs/manuscript_revision_audit_v4.md
+docs/modtran_downwelling_decision_v112.md
+docs/NEXT_RESEARCH.md
+docs/noise_augmentation_statistical_analysis.md
+docs/noise_vs_error_budget.md
+docs/perturbation_model_error_sources.md
+docs/pinn_architecture_mathematical_analysis.md
+docs/pinn_architecture_review_backlog.md
+docs/pinn_grounding.md
+docs/training_strategy_comparison.csv
